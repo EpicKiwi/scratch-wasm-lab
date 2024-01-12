@@ -1,0 +1,8 @@
+{
+    "C_Cpp.default.includePath": [
+        "C:\\emsdk\\upstream\\emscripten\\system\\include"
+    ],
+    "files.associations": {
+        "emscripten.h": "c"
+    }
+}

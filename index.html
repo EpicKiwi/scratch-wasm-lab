@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wasmlab</title>
+</head>
+<body>
+    
+    <h1>Hello fruits</h1>
+    <ol id="fruit-list"></ol>
+
+    <script type="module">
+        WebAssembly.instantiateStreaming(fetch("rust/target/wasm32-unknown-unknown/release/fruits.wasm"), {})
+            .then(async w => {
+                const { memory, reset, nextFruit } = w.instance.exports
+
+                reset()
+
+                let containerEl = document.getElementById("fruit-list")
+
+                let namePtr = 0;
+                while((namePtr = nextFruit()) != 0){
+                    let el = document.createElement("li")
+                    el.textContent = getStringFromMemory(namePtr, memory.buffer); //`${namePtr} (${new Uint8Array(memory.buffer.slice(namePtr, namePtr+1))[0]})`
+                    containerEl.append(el)
+                    //await new Promise(res => requestAnimationFrame(res))
+                }
+            })
+        
+        let decoder = new TextDecoder()
+
+        function getStringFromMemory(startPtr, source){
+            let length = 0;
+            let view = new DataView(source, startPtr)
+            while(view.getUint8(length) != 0 && length < view.byteLength){length += 1}
+            return decoder.decode(source.slice(startPtr, startPtr+length))
+        }
+    </script>
+
+</body>
+</html>
